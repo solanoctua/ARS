@@ -21,7 +21,7 @@ cam_right = cv2.VideoCapture(1)
 if cam_left.isOpened() and cam_right.isOpened() :
     ret_left , frame_left = self.cam_left.read()
     ret_right , frame_right = self.cam_right.read()     
- else:
+else:
     ret1,ret2 = False
 
 while ret1 and ret2:
@@ -42,8 +42,8 @@ while ret1 and ret2:
     mapR1, mapR2 = cv2.fisheye.initUndistortRectifyMap(rightCamMtx, leftCamDist, np.eye(3), mtx, size=frameSize, m1type= cv2.CV_16SC2)  #cv2.CV_16SC2
     undistorted_right = cv2.remap(frame_right, map1, map2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT )
 
-    stereo = cv2.StereoSGBM_create(	[, minDisparity[, numDisparities[, blockSize[, P1[, P2[, disp12MaxDiff[, preFilterCap[, uniquenessRatio[, speckleWindowSize[, speckleRange[, mode]]]]]]]]]]]
-    disparity_map = stereo.compute(undistorted_left, undistorted_right)
+    stereo = cv2.StereoSGBM_create(	[minDisparity[, numDisparities[, blockSize[, P1[, P2[, disp12MaxDiff[, preFilterCap[, uniquenessRatio[, speckleWindowSize[, speckleRange[, mode]]]]]]]]]]]
+    disparity_map = stereo.compute(,undistorted_left, undistorted_right)
 
     # Feature Detection/Matching
     fast = cv2.FastFeatureDetector_create()
