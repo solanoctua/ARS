@@ -3,6 +3,7 @@ import numpy as np
 
 def nothing(x):
     pass
+
 cv2.namedWindow("Trackbars")
 cv2.createTrackbar("min - H", "Trackbars", 0, 179, nothing)
 cv2.createTrackbar("min - S", "Trackbars", 84, 255, nothing)
@@ -34,17 +35,37 @@ while ret :
     min_red = np.array([min_h, min_s, min_v])
     max_red = np.array([max_h, max_s, max_v])
     
-    
     mask_red = cv2.inRange(hsv_frame, min_red, max_red)
     red = cv2.bitwise_and(frame, frame, mask = mask_red)
-   
-    cv2.imshow("realTimeCameraRed",red)
+    contours, hierarchy = cv2.findContours(mask_red , cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #print("The number of red objects in the frame is {}".format(len(contours)-1))
+    
+    if len(contours) >= 1:
+        # Sort all the contours wrt their areas to discard the small objects
+        red_objects = sorted(contours, key=cv2.contourArea)
+        red_objects = red_objects[-1:] # Take the 3 objects with the largest area
+        for object in red_objects: 
+            #print("Area = ",cv2.contourArea(object))
+            if cv2.contourArea(object) >= 500: # If area is big enough, find its center etc.
+                cv2.putText(red, "Red Object Detected", (15, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (255, 0, 255), 2)
+                # Get the moments https://docs.opencv.org/3.4/d8/d23/classcv_1_1Moments.html
+                moment = cv2.moments(object) # To find the center of the contour, we use cv2.moment
+                center = (moment['m10'] / (moment['m00'] + 1e-5), moment['m01'] / (moment['m00'] + 1e-5)) # calculate center of the contour
+                #print(center)
+                color = (255, 255, 255)
+                cv2.circle(red, (int(center[0]), int(center[1])), 1, color, -1) # draw circle at the center of the contour
+                cv2.putText(red, "({},{})".format(int(center[0]) , int(center[1])), (int(center[0]) , int(center[1]) + 45), cv2.FONT_HERSHEY_SIMPLEX, 0.75, color, 2) # write pixel coordinates
+        
+        result = cv2.drawContours(red, object, -1, (0,255,0), 3) 
+        cv2.imshow("result",result)
+    
     """
     cv2.imshow("realTimeCameraH",H)
     cv2.imshow("realTimeCameraS",S)
     cv2.imshow("realTimeCameraV",V)
     cv2.imshow("realTimeCameraHSV",hsv_frame)
     """
+    cv2.imshow("realTimeCameraRed",red)
     cv2.imshow("realTimeCamera",frame)
     
     key=cv2.waitKey(1)
